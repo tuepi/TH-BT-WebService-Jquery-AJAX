@@ -2,7 +2,18 @@
 <html>
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script>
+    <script type="text/javascript">
+        function test() {
+            $(document).ready(function () {
+                $("#test").click(function () {
+                    $("#show-test").show();
+                });
+                $("#hi").click(function () {
+                    $("#show-test").hide();
+                });
+            });
+        }
+
         $(document).ready(function () {
             $("#hide").click(function () {
                 $("p").hide();
@@ -10,8 +21,8 @@
             $("#show").click(function () {
                 $("p").show();
             });
-            $("button").click(function () {
-                let div = $("div");
+            $("#run").click(function () {
+                let div = $("#out");
                 div.animate({left: '100px'}, "slow");
                 div.animate({fontSize: '100px'}, "slow");
             });
@@ -22,16 +33,94 @@
                 document.getElementById("out").innerHTML = "Ôi";
             });
         });
+
+        function getAllProduct() {
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/api/products",
+                success: function (data) {
+                    console.log(data);
+                    displayList(data);
+                },
+            })
+        }
+
+        function getAllCategory() {
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/api/products/categories",
+                success: function (data) {
+                    console.log(data);
+                    displayList(data);
+                },
+            })
+        }
+
+        function displayList(array) {
+            let a = "List : <br>";
+            for (let i = 0; i < array.length; i++) {
+                a += array[i].name + "<br>";
+            }
+            document.getElementById("displayAddForm").innerHTML = a;
+        }
+
+        function showAddForm() {
+            let form = '<input type="text" id="name">\n' +
+                '<input type="text" id="price">\n' +
+                '<input type="text" id="category">' +
+                '<button onclick="saveProduct()">Save</button>'
+            document.getElementById("displayAddForm").innerHTML = form;
+        }
+
+        function saveProduct(){
+            let name = document.getElementById("name").value;
+            let price = document.getElementById("price").value;
+            let category = document.getElementById("category").value;
+            let product = {
+                name: name,
+                price: price,
+                category: {
+                    id : category
+                }
+            }
+            console.log(product)
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                type: "POST",
+                url: "http://localhost:8080/api/products",
+                data: JSON.stringify(product),
+                success: function () {
+                    getAllProduct();
+                },
+                error: function (error) {
+                    console.log(error)
+                },
+            })
+        }
     </script>
 </head>
 <body>
-<p>If you click on the "Hide" button, I will disappear.</p>
-<button id="hide">Hide</button>
-<button id="show">Show</button>
-<button>Start Animation</button>
-<button id="reload">Reload</button>
-<p>By default, all HTML elements have a static position, and cannot be moved. To manipulate the position, remember to
-    first set the CSS position property of the element to relative, fixed, or absolute!</p>
-<div style="background:#98bf21;height:100px;width:200px;position:absolute;" id="out">TUỆ</div>
+<button id="test" onclick="test()">Show Test</button>
+<button id="hi" onclick="test()">Hide Test</button>
+<button onclick="getAllProduct()">Show Product List</button>
+<button onclick="getAllCategory()">Show Category List</button>
+<button onclick="showAddForm()">Add Product</button>
+<div><h2 id="products"></h2></div>
+<div id="displayAddForm"></div>
+<div id="show-test" hidden>
+    <p>If you click on the "Hide" button, I will disappear.</p>
+    <button id="hide">Hide</button>
+    <button id="show">Show</button>
+    <button id="run">Start Animation</button>
+    <button id="reload">Reload</button>
+    <p>By default, all HTML elements have a static position, and cannot be moved. To manipulate the position, remember
+        to
+        first set the CSS position property of the element to relative, fixed, or absolute!</p>
+    <div style="background:#98bf21;height:100px;width:200px;position:absolute;" id="out">TUỆ</div>
+</div>
+
 </body>
 </html>
