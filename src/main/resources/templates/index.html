@@ -1,126 +1,296 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+          integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
+            crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script type="text/javascript">
-        function test() {
-            $(document).ready(function () {
-                $("#test").click(function () {
-                    $("#show-test").show();
-                });
-                $("#hi").click(function () {
-                    $("#show-test").hide();
-                });
-            });
-        }
 
-        $(document).ready(function () {
-            $("#hide").click(function () {
-                $("p").hide();
-            });
-            $("#show").click(function () {
-                $("p").show();
-            });
-            $("#run").click(function () {
-                let div = $("#out");
-                div.animate({left: '100px'}, "slow");
-                div.animate({fontSize: '100px'}, "slow");
-            });
-            $("#reload").click(function () {
-                let div = $("div");
-                div.animate({left: '0px'}, "slow");
-                div.animate({fontSize: '20px'}, "slow");
-                document.getElementById("out").innerHTML = "Ôi";
-            });
-        });
-
-        function getAllProduct() {
-            $.ajax({
-                type: "GET",
-                url: "http://localhost:8080/api/products",
-                success: function (data) {
-                    console.log(data);
-                    displayList(data);
-                },
-            })
-        }
-
-        function getAllCategory() {
-            $.ajax({
-                type: "GET",
-                url: "http://localhost:8080/api/products/categories",
-                success: function (data) {
-                    console.log(data);
-                    displayList(data);
-                },
-            })
-        }
-
-        function displayList(array) {
-            let a = "List : <br>";
-            for (let i = 0; i < array.length; i++) {
-                a += array[i].name + "<br>";
-            }
-            document.getElementById("displayAddForm").innerHTML = a;
-        }
-
-        function showAddForm() {
-            let form = '<input type="text" id="name">\n' +
-                '<input type="text" id="price">\n' +
-                '<input type="text" id="category">' +
-                '<button onclick="saveProduct()">Save</button>'
-            document.getElementById("displayAddForm").innerHTML = form;
-        }
-
-        function saveProduct(){
-            let name = document.getElementById("name").value;
-            let price = document.getElementById("price").value;
-            let category = document.getElementById("category").value;
-            let product = {
-                name: name,
-                price: price,
-                category: {
-                    id : category
-                }
-            }
-            console.log(product)
-            $.ajax({
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                type: "POST",
-                url: "http://localhost:8080/api/products",
-                data: JSON.stringify(product),
-                success: function () {
-                    getAllProduct();
-                },
-                error: function (error) {
-                    console.log(error)
-                },
-            })
-        }
-    </script>
 </head>
-<body>
-<button id="test" onclick="test()">Show Test</button>
-<button id="hi" onclick="test()">Hide Test</button>
-<button onclick="getAllProduct()">Show Product List</button>
-<button onclick="getAllCategory()">Show Category List</button>
-<button onclick="showAddForm()">Add Product</button>
-<div><h2 id="products"></h2></div>
-<div id="displayAddForm"></div>
+<body onload="getAllByCategoryId()" style="background-color: #cbb9e7">
+<!--<button class="btn btn-outline-success" id="test" onclick="test()">Show Test</button>-->
+<!--<button class="btn btn-outline-success" id="hi" onclick="test()">Hide Test</button>-->
+<!--<button class="btn btn-outline-success" onclick="getAllProduct()">Show Product List</button>-->
+<button class="btn btn-outline-success" onclick="showAddForm()">Add Product</button>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+    Launch demo modal
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+
+    <div class="form-row ">
+        <div id="showList"></div>
+        <div class="form-group col-md-1.5">
+            <input type="text" class="form-control" id="from" placeholder="Price from">
+        </div>
+        <div class="form-group col-md-1.5">
+            <input type="text" class="form-control" id="to" placeholder="To">
+        </div>
+        <div class="form-group col-md-1.5">
+            <button class="btn btn-primary" onclick="searchByPrice()">Search by price</button>
+        </div>
+    </div>
+</div>
+
+<div id="showById"></div>
+<div id="display"></div>
 <div id="show-test" hidden>
     <p>If you click on the "Hide" button, I will disappear.</p>
-    <button id="hide">Hide</button>
-    <button id="show">Show</button>
-    <button id="run">Start Animation</button>
-    <button id="reload">Reload</button>
+    <button class="btn btn-outline-success" id="hide">Hide</button>
+    <button class="btn btn-outline-success" id="show">Show</button>
+    <button class="btn btn-outline-success" id="run">Start Animation</button>
+    <button class="btn btn-outline-success" id="reload">Reload</button>
     <p>By default, all HTML elements have a static position, and cannot be moved. To manipulate the position, remember
         to
         first set the CSS position property of the element to relative, fixed, or absolute!</p>
     <div style="background:#98bf21;height:100px;width:200px;position:absolute;" id="out">TUỆ</div>
 </div>
 
+
 </body>
+<script type="text/javascript">
+    getAllProduct();
+    function searchByPrice() {
+        let from = document.getElementById("from").value;
+        let to = document.getElementById("to").value;
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/products/find-by-price?from=" + from + "&to=" + to,
+            success: function (data) {
+                console.log(data);
+                displayList(data);
+            },
+        })
+    }
+
+    function test() {
+        $(document).ready(function () {
+            $("#test").click(function () {
+                $("#show-test").show();
+            });
+            $("#hi").click(function () {
+                $("#show-test").hide();
+            });
+        });
+    }
+
+    $(document).ready(function () {
+        $("#hide").click(function () {
+            $("p").hide();
+        });
+        $("#show").click(function () {
+            $("p").show();
+        });
+        $("#run").click(function () {
+            let div = $("#out");
+            div.animate({left: '100px'}, "slow");
+            div.animate({fontSize: '100px'}, "slow");
+        });
+        $("#reload").click(function () {
+            let div = $("div");
+            div.animate({left: '0px'}, "slow");
+            div.animate({fontSize: '20px'}, "slow");
+            document.getElementById("out").innerHTML = "Ôi";
+        });
+    });
+
+    function getAllProduct() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/products",
+            success: function (data) {
+                console.log(data);
+                displayList(data);
+            },
+        })
+    }
+
+    function showByCategoryId() {
+        let id = document.getElementById("category").value;
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/products/category_id/" + id,
+            success: function (data) {
+                displayList(data)
+            },
+        })
+    }
+
+    function getAllByCategoryId() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/categories",
+            success: function (categories) {
+                let opt = `<select id="category" class="custom-select" required style="width: 150px">
+                           <option value="0">All</option>`;
+                for (let i = 0; i < categories.length; i++) {
+                    opt += `<option value="${categories[i].id}">${categories[i].name}</option>`
+                }
+                opt += `</select><button class="btn btn-outline-success" onclick="showByCategoryId()">Show List</button`;
+                document.getElementById("showList").innerHTML = opt;
+                console.log(categories);
+            },
+        })
+    }
+
+    function displayList(array) {
+
+        let a = "<table class=\"table\">\n" +
+            "    <thead class=\"thead-dark\">\n" +
+            "    <tr>\n" +
+            "        <th scope=\"col\">Id</th>\n" +
+            "        <th scope=\"col\">Name</th>\n" +
+            "        <th scope=\"col\">Price</th>\n" +
+            "        <th scope=\"col\">Category</th>\n" +
+            "        <th scope=\"col\">Edit</th>\n" +
+            "    </tr>\n" +
+            "    </thead>\n" +
+            "    <tbody>\n";
+
+        for (let i = 0; i < array.length; i++) {
+            a += "    <tr>\n" +
+                "        <th scope=\"row\">" + array[i].id + "</th>\n" +
+                "        <td>" + array[i].name + "</td>\n" +
+                "        <td>" + array[i].price + "</td>\n" +
+                "        <td>" + array[i].category.name + "</td>\n" +
+                "        <td><button class=\"btn btn-outline-success\" onclick=\"showUpdateForm(" + array[i].id + ")\">Edit</button><br></td>\n" +
+                "    </tr>\n";
+        }
+        a += "  </tbody>" +
+            "</table>";
+        document.getElementById("display").innerHTML = a;
+    }
+
+    function showAddForm() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/categories",
+            success: function (categories) {
+                console.log(categories);
+                let form = `<input type="text" id="name">\n` +
+                    `<input type="text" id="price">\n` +
+                    `<select id="cate" class="custom-select" required style="width: 150px">`;
+                for (let i = 0; i < categories.length; i++) {
+                    form += `<option value="${categories[i].id}">${categories[i].name}</option>`
+                }
+                form += `</select>` + `<button class="btn btn-outline-success" onclick="saveProduct()">Save</button>`;
+                document.getElementById("display").innerHTML = form;
+            },
+        })
+    }
+
+    function showUpdateForm(id) {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/products/" + id,
+            success: function (data) {
+                $.ajax({
+                    type: "GET",
+                    url: "http://localhost:8080/api/categories",
+                    success: function (categories) {
+                        console.log(categories);
+                        let form = `<input type="text" id="name" value="${data.name}">\n` +
+                            `<input type="text" id="price" value="${data.price}">\n` +
+                            `<select id="cate" class="custom-select" required style="width: 150px">`;
+                        for (let i = 0; i < categories.length; i++) {
+                            form += `<option value="${categories[i].id}">${categories[i].name}</option>`
+                        }
+                        form += `</select><button class="btn btn-outline-success" onclick="editProduct(` + id + `)">Edit</button>`;
+                        document.getElementById("display").innerHTML = form;
+                    },
+                })
+            },
+        })
+    }
+
+    function editProduct(id) {
+        console.log(id)
+        let name = document.getElementById("name").value;
+        let price = document.getElementById("price").value;
+        let category = document.getElementById("cate").value;
+        console.log("cate: " + category)
+        let product = {
+            name: name,
+            price: price,
+            category: {
+                id: category
+            }
+        }
+        console.log(product)
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            type: "PUT",
+            url: "http://localhost:8080/api/products/" + id,
+            data: JSON.stringify(product),
+            success: function () {
+                getAllProduct();
+            },
+            error: function (error) {
+                console.log(error)
+            },
+        })
+    }
+
+    function saveProduct() {
+        let name = document.getElementById("name").value;
+        let price = document.getElementById("price").value;
+        let category = document.getElementById("cate").value;
+        let product = {
+            name: name,
+            price: price,
+            category: {
+                id: category
+            }
+        }
+        console.log(product)
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            type: "POST",
+            url: "http://localhost:8080/api/products",
+            data: JSON.stringify(product),
+            success: function () {
+                getAllProduct();
+            },
+            error: function (error) {
+                console.log(error)
+            },
+        })
+        $.post("http://localhost:8080/api/products",)
+    }
+
+</script>
 </html>

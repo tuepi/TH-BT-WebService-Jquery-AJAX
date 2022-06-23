@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IProductRepository extends JpaRepository<Product, Long> {
-    Iterable<Product> findAllByCategory_Id(Long id);
+    Iterable<Product> findAllByCategoryId(Long id);
 
+    Iterable<Product> findAllByCategoryName(String name);
 
+    Iterable<Product> findAllByPriceBetween(int from, int to);
 }

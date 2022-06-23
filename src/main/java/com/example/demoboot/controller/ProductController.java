@@ -21,7 +21,7 @@ public class ProductController {
     @Autowired
     private CategoryServiceImpl categoryService;
 
-    @GetMapping //hiển thị ds sẩn phẩm
+    @GetMapping
     public ResponseEntity<Iterable<Product>> findAllProduct() {
         List<Product> products = (List<Product>) productService.findAll();
         if (products.isEmpty()) {
@@ -30,23 +30,9 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @GetMapping("/categories") //hiển thị ds loại sp
-    public ResponseEntity<Iterable<Category>> findAllCategory() {
-        List<Category> categories = (List<Category>) categoryService.findAll();
-        if (categories.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(categories, HttpStatus.OK);
-    }
-
-    @PostMapping // thêm sp
+    @PostMapping
     public ResponseEntity<Product> saveProduct(@RequestBody Product product) {
         return new ResponseEntity<>(productService.save(product), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/categories") // thêm loại sp
-    public ResponseEntity<Category> saveCategory(@RequestBody Category category) {
-        return new ResponseEntity<>(categoryService.save(category), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -59,23 +45,30 @@ public class ProductController {
         return new ResponseEntity<>(productService.save(product), HttpStatus.OK);
     }
 
-    @PostMapping("/category_id/{id}") // hiển thị sp theo loại
+    @GetMapping("/category_id/{id}")
     public ResponseEntity<Iterable<Product>> findAllByCategory_Id(@PathVariable Long id) {
-
-        List<Product> products = (List<Product>) productService.findAllByCategory_Id(id);
+        List<Product> products = (List<Product>) productService.findAllByCategoryId(id);
         if (products.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @GetMapping("/view/{id}") // hiển thị thông tin sp
+    @GetMapping("/{id}")
     public ResponseEntity<Product> showViewById(@PathVariable Long id) {
         Optional<Product> product = productService.findById(id);
-        if (!product.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(product.get(), HttpStatus.OK);
+        return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping("/find-by-name/{name}")
+    public ResponseEntity<Iterable<Product>> showViewById(@PathVariable String name) {
+        Iterable<Product> product = productService.findAllByCategoryName(name);
+        return new ResponseEntity<>(product, HttpStatus.OK);
+    }
+
+    @GetMapping("/find-by-price")
+    public ResponseEntity<Iterable<Product>> showViewById(@RequestParam int from, @RequestParam int to) {
+        Iterable<Product> product = productService.findAllByPriceBetween(from, to);
+        return new ResponseEntity<>(product, HttpStatus.OK);
+    }
 }

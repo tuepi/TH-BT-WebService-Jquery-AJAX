@@ -33,7 +33,18 @@ public class ProductServiceImpl implements IProductService {
         productRepository.deleteById(id);
     }
 
-    public Iterable<Product> findAllByCategory_Id(Long id){
-        return productRepository.findAllByCategory_Id(id);
+    public Iterable<Product> findAllByCategoryId(Long id){
+        if (id == 0) {
+            return productRepository.findAll();
+        }
+        return productRepository.findAllByCategoryId(id);
+    }
+
+    public Iterable<Product> findAllByCategoryName(String name){
+        return productRepository.findAllByCategoryName(name);
+    }
+
+    public Iterable<Product> findAllByPriceBetween(int from, int to){
+        return productRepository.findAllByPriceBetween(from, to);
     }
 }
