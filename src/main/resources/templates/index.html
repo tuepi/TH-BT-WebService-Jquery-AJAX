@@ -7,43 +7,108 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
             integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
             crossorigin="anonymous"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
             crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 
 </head>
 <body onload="getAllByCategoryId()" style="background-color: #cbb9e7">
 <!--<button class="btn btn-outline-success" id="test" onclick="test()">Show Test</button>-->
 <!--<button class="btn btn-outline-success" id="hi" onclick="test()">Hide Test</button>-->
 <!--<button class="btn btn-outline-success" onclick="getAllProduct()">Show Product List</button>-->
-<button class="btn btn-outline-success" onclick="showAddForm()">Add Product</button>
+<!--<button class="btn btn-outline-success" onclick="showAddForm()">Add Product</button>-->
 <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-    Launch demo modal
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" id="showAddModal"
+        onclick="showAddForm()">
+    Add Product
 </button>
-
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Add Product</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                ...
+                <div class="form-row">
+                    <!--                    <div class="form-group col-md-12">-->
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name">
+
+                    <label for="price">Price</label>
+                    <input type="text" class="form-control" id="price">
+                    <!--                    </div>-->
+                    <!--                    <div class="form-group col-md-4">-->
+                    <label for="cate">State</label>
+                    <select id="cate" class="form-control">
+
+                    </select>
+                    <!--                    </div>-->
+                </div>
+            </div>
+            <div class="alert alert-danger hide">
+
+            </div>
+            <div class="alert alert-success hide">
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary" onclick="saveProduct()">Add</button>
             </div>
         </div>
     </div>
 </div>
+
+<!--<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" id="showEditModal"-->
+<!--        onclick="showAddForm()">-->
+<!--    Add Product-->
+<!--</button>-->
+<!--&lt;!&ndash; Modal &ndash;&gt;-->
+<!--<div class="modal fade" id="exampleEditModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
+<!--    <div class="modal-dialog">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <h5 class="modal-title" id="exampleEditModalLabel">Add Product</h5>-->
+<!--                <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                    <span aria-hidden="true">&times;</span>-->
+<!--                </button>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <div class="form-row">-->
+<!--                    <div class="form-group col-md-12">-->
+<!--                        <label for="name">Name</label>-->
+<!--                        <input type="text" class="form-control" id="name">-->
+
+<!--                        <label for="price">Price</label>-->
+<!--                        <input type="text" class="form-control" id="price">-->
+<!--                    </div>-->
+<!--                    <div class="form-group col-md-4">-->
+<!--                        <label for="cate">State</label>-->
+<!--                        <select id="cate" class="form-control">-->
+
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="alert alert-danger hide">-->
+
+<!--            </div>-->
+<!--            <div class="alert alert-success hide">-->
+
+<!--            </div>-->
+<!--            <div class="modal-footer">-->
+<!--                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+<!--                <button type="button" class="btn btn-primary" onclick="saveProduct()">Add</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 <div>
 
     <div class="form-row ">
@@ -74,10 +139,36 @@
     <div style="background:#98bf21;height:100px;width:200px;position:absolute;" id="out">TUỆ</div>
 </div>
 
-
 </body>
 <script type="text/javascript">
     getAllProduct();
+
+    function showUpdateForm(id) {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/products/" + id,
+            success: function (data) {
+                $.ajax({
+                    type: "GET",
+                    url: "http://localhost:8080/api/categories",
+                    success: function (categories) {
+
+                        console.log(categories);
+                        let modal = ""
+                        let form = `<input type="text" id="name" value="${data.name}">\n` +
+                            `<input type="text" id="price" value="${data.price}">\n` +
+                            `<select id="cate" class="custom-select" required style="width: 150px">`;
+                        for (let i = 0; i < categories.length; i++) {
+                            form += `<option value="${categories[i].id}">${categories[i].name}</option>`
+                        }
+                        form += `</select><button class="btn btn-outline-success" onclick="editProduct(` + id + `)">Edit</button>`;
+                        document.getElementById("display").innerHTML = form;
+                    },
+                })
+            },
+        })
+    }
+
     function searchByPrice() {
         let from = document.getElementById("from").value;
         let to = document.getElementById("to").value;
@@ -89,6 +180,60 @@
                 displayList(data);
             },
         })
+    }
+
+    function showAddForm() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/categories",
+            success: function (categories) {
+                console.log(categories);
+                let form = ``;
+                for (let i = 0; i < categories.length; i++) {
+                    form += `<option value="${categories[i].id}">${categories[i].name}</option>`
+                }
+                document.getElementById("cate").innerHTML = form;
+            },
+        })
+    }
+
+    function saveProduct() {
+        let name = document.getElementById("name").value;
+        let price = document.getElementById("price").value;
+        let category = document.getElementById("cate").value;
+        let product = {
+            name: name,
+            price: price,
+            category: {
+                id: category
+            }
+        }
+        console.log(product)
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            type: "POST",
+            url: "http://localhost:8080/api/products",
+            data: JSON.stringify(product),
+            success: function () {
+                console.log(product)
+                $('.alert-success').html('Successful!').removeClass('hide');
+                $('.alert-danger').addClass('hide');
+
+                setTimeout(function () {
+                    $("#exampleModal").modal('hide');
+                    $('.alert-danger').addClass('hide');
+                    $('.alert-success').addClass('hide');
+                }, 1500);
+                getAllProduct();
+            },
+            error: function (error) {
+                console.log(error)
+            },
+        })
+        $.post("http://localhost:8080/api/products",)
     }
 
     function test() {
@@ -181,7 +326,8 @@
                 "        <td>" + array[i].name + "</td>\n" +
                 "        <td>" + array[i].price + "</td>\n" +
                 "        <td>" + array[i].category.name + "</td>\n" +
-                "        <td><button class=\"btn btn-outline-success\" onclick=\"showUpdateForm(" + array[i].id + ")\">Edit</button><br></td>\n" +
+                // "        <td><button class=\"btn btn-outline-success\" onclick=\"showUpdateForm(" + array[i].id + ")\">Edit</button><br></td>\n" +
+                "        <td><button type='button' class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#exampleModal\" id=\"showEditModal\" onclick=\"showUpdateForm(" + array[i].id + ")\">Edit</button><br></td>\n" +
                 "    </tr>\n";
         }
         a += "  </tbody>" +
@@ -189,47 +335,24 @@
         document.getElementById("display").innerHTML = a;
     }
 
-    function showAddForm() {
-        $.ajax({
-            type: "GET",
-            url: "http://localhost:8080/api/categories",
-            success: function (categories) {
-                console.log(categories);
-                let form = `<input type="text" id="name">\n` +
-                    `<input type="text" id="price">\n` +
-                    `<select id="cate" class="custom-select" required style="width: 150px">`;
-                for (let i = 0; i < categories.length; i++) {
-                    form += `<option value="${categories[i].id}">${categories[i].name}</option>`
-                }
-                form += `</select>` + `<button class="btn btn-outline-success" onclick="saveProduct()">Save</button>`;
-                document.getElementById("display").innerHTML = form;
-            },
-        })
-    }
+    // function showAddForm() {
+    //     $.ajax({
+    //         type: "GET",
+    //         url: "http://localhost:8080/api/categories",
+    //         success: function (categories) {
+    //             console.log(categories);
+    //             let form = `<input type="text" class="form-control" id="name" style="width: 200px">\n` +
+    //                 `<input type="text" class="form-control" id="price" style="width: 200px">\n` +
+    //                 `<select id="cate" class="custom-select" required style="width: 150px">`;
+    //             for (let i = 0; i < categories.length; i++) {
+    //                 form += `<option value="${categories[i].id}">${categories[i].name}</option>`
+    //             }
+    //             form += `</select>` + `<button class="btn btn-outline-success" onclick="saveProduct()">Save</button>`;
+    //             document.getElementById("display").innerHTML = form;
+    //         },
+    //     })
+    // }
 
-    function showUpdateForm(id) {
-        $.ajax({
-            type: "GET",
-            url: "http://localhost:8080/api/products/" + id,
-            success: function (data) {
-                $.ajax({
-                    type: "GET",
-                    url: "http://localhost:8080/api/categories",
-                    success: function (categories) {
-                        console.log(categories);
-                        let form = `<input type="text" id="name" value="${data.name}">\n` +
-                            `<input type="text" id="price" value="${data.price}">\n` +
-                            `<select id="cate" class="custom-select" required style="width: 150px">`;
-                        for (let i = 0; i < categories.length; i++) {
-                            form += `<option value="${categories[i].id}">${categories[i].name}</option>`
-                        }
-                        form += `</select><button class="btn btn-outline-success" onclick="editProduct(` + id + `)">Edit</button>`;
-                        document.getElementById("display").innerHTML = form;
-                    },
-                })
-            },
-        })
-    }
 
     function editProduct(id) {
         console.log(id)
@@ -262,35 +385,6 @@
         })
     }
 
-    function saveProduct() {
-        let name = document.getElementById("name").value;
-        let price = document.getElementById("price").value;
-        let category = document.getElementById("cate").value;
-        let product = {
-            name: name,
-            price: price,
-            category: {
-                id: category
-            }
-        }
-        console.log(product)
-        $.ajax({
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            type: "POST",
-            url: "http://localhost:8080/api/products",
-            data: JSON.stringify(product),
-            success: function () {
-                getAllProduct();
-            },
-            error: function (error) {
-                console.log(error)
-            },
-        })
-        $.post("http://localhost:8080/api/products",)
-    }
 
 </script>
 </html>
