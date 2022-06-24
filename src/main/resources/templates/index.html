@@ -58,8 +58,8 @@
 
             </div>
             <div class="modal-footer" id="but">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveProduct()">Add</button>
+<!--                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+<!--                <button type="button" class="btn btn-primary" onclick="saveProduct()">Save</button>-->
             </div>
         </div>
     </div>
@@ -118,7 +118,7 @@
                             form2 += `<option value="${categories[i].id}">${categories[i].name}</option>`
                         }
                         let but = `<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="editProduct(`+ id +`)">Edit</button>`
+                <button type="button" class="btn btn-primary" onclick="editProduct(`+ id +`)">Save</button>`
                         document.getElementById("input").innerHTML = form1;
                         document.getElementById("cate").innerHTML = form2;
                         document.getElementById("but").innerHTML = but;
@@ -147,11 +147,59 @@
             url: "http://localhost:8080/api/categories",
             success: function (categories) {
                 console.log(categories);
-                let form = ``;
+                let form1 = `<label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" value="">
+
+                        <label for="price">Price</label>
+                        <input type="text" class="form-control" id="price" value="">`
+                let form2 = ``;
                 for (let i = 0; i < categories.length; i++) {
-                    form += `<option value="${categories[i].id}">${categories[i].name}</option>`
+                    form2 += `<option value="${categories[i].id}">${categories[i].name}</option>`
                 }
-                document.getElementById("cate").innerHTML = form;
+                let but = `<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveProduct()">Save</button>`
+                document.getElementById("input").innerHTML = form1;
+                document.getElementById("cate").innerHTML = form2;
+                document.getElementById("but").innerHTML = but;
+            },
+        })
+    }
+
+    function editProduct(id) {
+        console.log(id)
+        let name = document.getElementById("name").value;
+        let price = document.getElementById("price").value;
+        let category = document.getElementById("cate").value;
+        console.log("cate: " + category)
+        let product = {
+            name: name,
+            price: price,
+            category: {
+                id: category
+            }
+        }
+        console.log(product)
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            type: "PUT",
+            url: "http://localhost:8080/api/products/" + id,
+            data: JSON.stringify(product),
+            success: function () {
+                $('.alert-success').html('Successful!').removeClass('hide');
+                $('.alert-danger').addClass('hide');
+
+                setTimeout(function () {
+                    $("#exampleModal").modal('hide');
+                    $('.alert-danger').addClass('hide');
+                    $('.alert-success').addClass('hide');
+                }, 1500);
+                getAllProduct();
+            },
+            error: function (error) {
+                console.log(error)
             },
         })
     }
@@ -192,7 +240,6 @@
                 console.log(error)
             },
         })
-        $.post("http://localhost:8080/api/products",)
     }
 
     function test() {
@@ -313,44 +360,7 @@
     // }
 
 
-    function editProduct(id) {
-        console.log(id)
-        let name = document.getElementById("name").value;
-        let price = document.getElementById("price").value;
-        let category = document.getElementById("cate").value;
-        console.log("cate: " + category)
-        let product = {
-            name: name,
-            price: price,
-            category: {
-                id: category
-            }
-        }
-        console.log(product)
-        $.ajax({
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            type: "PUT",
-            url: "http://localhost:8080/api/products/" + id,
-            data: JSON.stringify(product),
-            success: function () {
-                $('.alert-success').html('Successful!').removeClass('hide');
-                $('.alert-danger').addClass('hide');
 
-                setTimeout(function () {
-                    $("#exampleModal").modal('hide');
-                    $('.alert-danger').addClass('hide');
-                    $('.alert-success').addClass('hide');
-                }, 1500);
-                getAllProduct();
-            },
-            error: function (error) {
-                console.log(error)
-            },
-        })
-    }
 
 
 </script>
