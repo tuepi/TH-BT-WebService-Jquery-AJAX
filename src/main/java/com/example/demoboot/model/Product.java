@@ -1,14 +1,17 @@
 package com.example.demoboot.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank(message = "Không được để trống!!!")
     private String name;
     private int price;
+
 
     @ManyToOne
     private Category category;
@@ -16,12 +19,6 @@ public class Product {
     public Product() {
     }
 
-    public Product(Long id, String name, int price, Category category) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.category = category;
-    }
 
     public Long getId() {
         return id;

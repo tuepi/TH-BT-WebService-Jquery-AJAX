@@ -7,9 +7,14 @@ import com.example.demoboot.service.impl.ProductServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -31,7 +36,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> saveProduct(@RequestBody Product product) {
+    public ResponseEntity<Product> saveProduct(@Valid @RequestBody Product product) {
         return new ResponseEntity<>(productService.save(product), HttpStatus.CREATED);
     }
 
@@ -60,6 +65,16 @@ public class ProductController {
         return product.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable Long id){
+        Optional<Product> questionOptional = productService.findById(id);
+        if(!questionOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        productService.remove(id);
+        return new ResponseEntity<>(questionOptional.get(),HttpStatus.OK);
+    }
+
     @GetMapping("/find-by-name/{name}")
     public ResponseEntity<Iterable<Product>> showViewById(@PathVariable String name) {
         Iterable<Product> product = productService.findAllByCategoryName(name);
@@ -71,4 +86,18 @@ public class ProductController {
         Iterable<Product> product = productService.findAllByPriceBetween(from, to);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
+    }
+
 }

@@ -17,14 +17,35 @@
 <body onload="getAllByCategoryId()" style="background-color: #cbb9e7">
 <!--<button class="btn btn-outline-success" id="test" onclick="test()">Show Test</button>-->
 <!--<button class="btn btn-outline-success" id="hi" onclick="test()">Hide Test</button>-->
-<!--<button class="btn btn-outline-success" onclick="getAllProduct()">Show Product List</button>-->
-<!--<button class="btn btn-outline-success" onclick="showAddForm()">Add Product</button>-->
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" id="showAddModal"
-        onclick="showAddForm()">
-    Add Product
-</button>
-<!-- Modal -->
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: #e3f2fd;">
+    <a class="navbar-brand" href="#">Homepage</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-toggle="modal" data-target="#exampleModal"
+                   onclick="showAddForm()">Add</a>
+            </li>
+            <li class="nav-item dropdown" id="showList">
+
+            </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </div>
+</nav>
+<hr>
+
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -51,37 +72,37 @@
                     </div>
                 </div>
             </div>
-            <div class="alert alert-danger hide">
+<!--            <div class="alert alert-danger hide">-->
 
-            </div>
+<!--            </div>-->
             <div class="alert alert-success hide">
 
             </div>
             <div class="modal-footer" id="but">
-<!--                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
-<!--                <button type="button" class="btn btn-primary" onclick="saveProduct()">Save</button>-->
+                <!--                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>-->
+                <!--                <button type="button" class="btn btn-primary" onclick="saveProduct()">Save</button>-->
             </div>
         </div>
     </div>
 </div>
 
-<div>
-
-    <div class="form-row ">
-        <div id="showList"></div>
-        <div class="form-group col-md-1.5">
-            <input type="text" class="form-control" id="from" placeholder="Price from">
-        </div>
-        <div class="form-group col-md-1.5">
-            <input type="text" class="form-control" id="to" placeholder="To">
-        </div>
-        <div class="form-group col-md-1.5">
-            <button class="btn btn-primary" onclick="searchByPrice()">Search by price</button>
+<div class="row">
+    <div class="col-3">
+        <p style="font-weight: bold">Search By Price</p>
+        <div class="form-row ">
+            <div class="form-group col-md-1.5">
+                <input type="text" class="form-control" id="from" placeholder="Price from">
+            </div>
+            <div class="form-group col-md-1.5">
+                <input type="text" class="form-control" id="to" placeholder="To">
+            </div>
+            <div class="form-group col-md-1.5">
+                <button class="btn btn-primary" onclick="searchByPrice()">Search</button>
+            </div>
         </div>
     </div>
+    <div id="display" class="col-9"></div>
 </div>
-
-<div id="display"></div>
 <div id="show-test" hidden>
     <p>If you click on the "Hide" button, I will disappear.</p>
     <button class="btn btn-outline-success" id="hide">Hide</button>
@@ -99,6 +120,7 @@
     getAllProduct();
 
     function showUpdateForm(id) {
+        $('.alert-success').html('').removeClass('hide');
         $.ajax({
             type: "GET",
             url: "http://localhost:8080/api/products/" + id,
@@ -108,9 +130,8 @@
                     url: "http://localhost:8080/api/categories",
                     success: function (categories) {
                         console.log(categories);
-                        let form1 =` <label for="name">Name</label>
+                        let form1 = ` <label for="name">Name</label>
                         <input type="text" class="form-control" id="name" value="${data.name}">
-
                         <label for="price">Price</label>
                         <input type="text" class="form-control" id="price" value="${data.price}">`
                         let form2 = ``
@@ -118,7 +139,7 @@
                             form2 += `<option value="${categories[i].id}">${categories[i].name}</option>`
                         }
                         let but = `<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="editProduct(`+ id +`)">Save</button>`
+                <button type="button" class="btn btn-primary" onclick="editProduct(` + id + `)">Save</button>`
                         document.getElementById("input").innerHTML = form1;
                         document.getElementById("cate").innerHTML = form2;
                         document.getElementById("but").innerHTML = but;
@@ -142,6 +163,7 @@
     }
 
     function showAddForm() {
+        $('.alert-success').html('').removeClass('hide');
         $.ajax({
             type: "GET",
             url: "http://localhost:8080/api/categories",
@@ -166,11 +188,9 @@
     }
 
     function editProduct(id) {
-        console.log(id)
         let name = document.getElementById("name").value;
         let price = document.getElementById("price").value;
         let category = document.getElementById("cate").value;
-        console.log("cate: " + category)
         let product = {
             name: name,
             price: price,
@@ -178,7 +198,6 @@
                 id: category
             }
         }
-        console.log(product)
         $.ajax({
             headers: {
                 'Accept': 'application/json',
@@ -205,6 +224,7 @@
     }
 
     function saveProduct() {
+        $('.alert-success').html('').removeClass('hide');
         let name = document.getElementById("name").value;
         let price = document.getElementById("price").value;
         let category = document.getElementById("cate").value;
@@ -215,7 +235,6 @@
                 id: category
             }
         }
-        console.log(product)
         $.ajax({
             headers: {
                 'Accept': 'application/json',
@@ -231,7 +250,7 @@
 
                 setTimeout(function () {
                     $("#exampleModal").modal('hide');
-                    $('.alert-danger').addClass('hide');
+                    // $('.alert-danger').addClass('hide');
                     $('.alert-success').addClass('hide');
                 }, 1500);
                 getAllProduct();
@@ -300,12 +319,12 @@
             type: "GET",
             url: "http://localhost:8080/api/categories",
             success: function (categories) {
-                let opt = `<select id="category" class="custom-select" required style="width: 150px">
+                let opt = `<select id="category" onchange="showByCategoryId()" class="custom-select" required style="width: 150px">
                            <option value="0">All</option>`;
                 for (let i = 0; i < categories.length; i++) {
                     opt += `<option value="${categories[i].id}">${categories[i].name}</option>`
                 }
-                opt += `</select><button class="btn btn-outline-success" onclick="showByCategoryId()">Show List</button`;
+                opt += `</select>`;
                 document.getElementById("showList").innerHTML = opt;
                 console.log(categories);
             },
@@ -317,28 +336,39 @@
         let a = "<table class=\"table\">\n" +
             "    <thead class=\"thead-dark\">\n" +
             "    <tr>\n" +
-            "        <th scope=\"col\">Id</th>\n" +
+            "        <th scope=\"col\">No.</th>\n" +
             "        <th scope=\"col\">Name</th>\n" +
             "        <th scope=\"col\">Price</th>\n" +
             "        <th scope=\"col\">Category</th>\n" +
             "        <th scope=\"col\">Edit</th>\n" +
+            "        <th scope=\"col\">Delete</th>\n" +
             "    </tr>\n" +
             "    </thead>\n" +
             "    <tbody>\n";
 
         for (let i = 0; i < array.length; i++) {
             a += `    <tr>\n` +
-                `        <th scope=\"row\">${array[i].id}</th>\n` +
+                `        <th scope=\"row\">${(i + 1)}</th>\n` +
                 `        <td>${array[i].name}</td>\n` +
                 `        <td>${array[i].price}</td>\n` +
                 `        <td>${array[i].category.name}</td>\n` +
-                // `        <td><button class=\"btn btn-outline-success\" onclick=\"showUpdateForm(" + array[i].id + ")\">Edit</button><br></td>\n" +
                 `        <td><button type='button' class=\"btn btn-primary\" data-toggle=\"modal\" data-target=\"#exampleModal\" id=\"showEditModal\" onclick=\"showUpdateForm(${array[i].id})\">Edit</button><br></td>\n` +
+                `        <td><button type='button' class=\"btn btn-danger\" onclick=\"deleteProduct(${array[i].id})\">Delete</button><br></td>\n` +
                 `    </tr>\n`;
         }
         a += "  </tbody>" +
             "</table>";
         document.getElementById("display").innerHTML = a;
+    }
+
+    function deleteProduct(id) {
+        $.ajax({
+            type: "DELETE",
+            url: "http://localhost:8080/api/products/" + id,
+            success: function () {
+                getAllProduct();
+            },
+        })
     }
 
     // function showAddForm() {
@@ -358,9 +388,6 @@
     //         },
     //     })
     // }
-
-
-
 
 
 </script>
