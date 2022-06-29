@@ -12,7 +12,6 @@
             integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
             crossorigin="anonymous"></script>
 
-
 </head>
 <body onload="getAllByCategoryId()" style="background-color: #cbb9e7">
 <!--<button class="btn btn-outline-success" id="test" onclick="test()">Show Test</button>-->
@@ -38,10 +37,10 @@
 
             </li>
         </ul>
-        <form class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
+        <div class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" id="search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="searchByName()">Search</button>
+        </div>
     </div>
 </nav>
 <hr>
@@ -60,7 +59,6 @@
                     <div class="form-group col-md-12" id="input">
                         <label for="name">Name</label>
                         <input type="text" class="form-control" id="name">
-
                         <label for="price">Price</label>
                         <input type="text" class="form-control" id="price">
                     </div>
@@ -72,9 +70,9 @@
                     </div>
                 </div>
             </div>
-<!--            <div class="alert alert-danger hide">-->
-
-<!--            </div>-->
+            <div class="alert alert-danger hide">
+                <p id="validName"></p>
+            </div>
             <div class="alert alert-success hide">
 
             </div>
@@ -103,6 +101,7 @@
     </div>
     <div id="display" class="col-9"></div>
 </div>
+<div id="paging"></div>
 <div id="show-test" hidden>
     <p>If you click on the "Hide" button, I will disappear.</p>
     <button class="btn btn-outline-success" id="hide">Hide</button>
@@ -117,6 +116,7 @@
 
 </body>
 <script type="text/javascript">
+    let validName = $("#validName")
     getAllProduct();
 
     function showUpdateForm(id) {
@@ -135,8 +135,8 @@
                         <label for="price">Price</label>
                         <input type="text" class="form-control" id="price" value="${data.price}">`
                         let form2 = ``
-                        for (let i = 0; i < categories.length; i++) {
-                            form2 += `<option value="${categories[i].id}">${categories[i].name}</option>`
+                        for (let i = 0; i < categories.content.length; i++) {
+                            form2 += `<option value="${categories.content[i].id}">${categories.content[i].name}</option>`
                         }
                         let but = `<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" onclick="editProduct(` + id + `)">Save</button>`
@@ -145,6 +145,19 @@
                         document.getElementById("but").innerHTML = but;
                     },
                 })
+            },
+        })
+    }
+
+    function searchByName() {
+        let name = document.getElementById("search").value;
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/products/find-by-name/" + name,
+            success: function (data) {
+                console.log(data);
+                displayList(data);
+                document.getElementById("search").value = ""
             },
         })
     }
@@ -169,14 +182,15 @@
             url: "http://localhost:8080/api/categories",
             success: function (categories) {
                 console.log(categories);
+                let array = categories.content
                 let form1 = `<label for="name">Name</label>
                         <input type="text" class="form-control" id="name" value="">
 
                         <label for="price">Price</label>
                         <input type="text" class="form-control" id="price" value="">`
                 let form2 = ``;
-                for (let i = 0; i < categories.length; i++) {
-                    form2 += `<option value="${categories[i].id}">${categories[i].name}</option>`
+                for (let i = 0; i < array.length; i++) {
+                    form2 += `<option value="${array[i].id}">${array[i].name}</option>`
                 }
                 let but = `<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" onclick="saveProduct()">Save</button>`
@@ -209,16 +223,16 @@
             success: function () {
                 $('.alert-success').html('Successful!').removeClass('hide');
                 $('.alert-danger').addClass('hide');
-
                 setTimeout(function () {
                     $("#exampleModal").modal('hide');
                     $('.alert-danger').addClass('hide');
                     $('.alert-success').addClass('hide');
-                }, 1500);
+                }, 1000);
                 getAllProduct();
             },
             error: function (error) {
                 console.log(error)
+                valiName.text(error.responseJSON.name)
             },
         })
     }
@@ -257,6 +271,7 @@
             },
             error: function (error) {
                 console.log(error)
+                validName.text(error.responseJSON.name)
             },
         })
     }
@@ -296,9 +311,37 @@
         $.ajax({
             type: "GET",
             url: "http://localhost:8080/api/products",
-            success: function (data) {
-                console.log(data);
-                displayList(data);
+            success: function (array) {
+                displayList(array.content);
+                console.log(array.pageable.pageNumber)
+                let str = ""
+                str +=`Current page: ${array.pageable.pageNumber +1}/${array.totalPages}`;
+                if (array.pageable.pageNumber < array.totalPages-1){
+                    str +=` <button onclick="displayList(${array.pageable.pageNumber +1})">Next</button>`
+                }
+                if (array.pageable.pageNumber > 0 ){
+                    str +=  `<button onclick="displayList(${array.pageable.pageNumber -1})">Back</button>`
+                    document.getElementById("paging").innerHTML = str;
+                }else {
+                    document.getElementById("paging").innerHTML = str;
+                }
+            },
+        })
+    }
+
+    function getAllByCategoryId() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/categories",
+            success: function (categories) {
+                let array = categories.content;
+                let opt = `<select id="category" onchange="showByCategoryId()" class="custom-select" required style="width: 150px">
+                           <option value="0">All</option>`;
+                for (let i = 0; i < array.length; i++) {
+                    opt += `<option value="${array[i].id}">${array[i].name}</option>`
+                }
+                opt += `</select>`;
+                document.getElementById("showList").innerHTML = opt;
             },
         })
     }
@@ -309,24 +352,7 @@
             type: "GET",
             url: "http://localhost:8080/api/products/category_id/" + id,
             success: function (data) {
-                displayList(data)
-            },
-        })
-    }
-
-    function getAllByCategoryId() {
-        $.ajax({
-            type: "GET",
-            url: "http://localhost:8080/api/categories",
-            success: function (categories) {
-                let opt = `<select id="category" onchange="showByCategoryId()" class="custom-select" required style="width: 150px">
-                           <option value="0">All</option>`;
-                for (let i = 0; i < categories.length; i++) {
-                    opt += `<option value="${categories[i].id}">${categories[i].name}</option>`
-                }
-                opt += `</select>`;
-                document.getElementById("showList").innerHTML = opt;
-                console.log(categories);
+                displayList(data.content)
             },
         })
     }
@@ -358,6 +384,7 @@
         }
         a += "  </tbody>" +
             "</table>";
+
         document.getElementById("display").innerHTML = a;
     }
 
@@ -388,7 +415,6 @@
     //         },
     //     })
     // }
-
 
 </script>
 </html>
