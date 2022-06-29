@@ -28,7 +28,7 @@
                 <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" data-toggle="modal" data-target="#addModal">Add</a>
+                <a class="nav-link" href="#" data-toggle="modal" data-target="#addModal" onclick="showAddForm()">Add</a>
             </li>
             <li class="nav-item dropdown" id="showList">
 
@@ -54,7 +54,8 @@
             <div class="modal-body">
                 <div class="form-row">
                     <div class="form-group col-md-12">
-                        <form enctype="multipart/form-data" id="addForm">
+                        <form enctype="multipart/form-data" id="form">
+                            <input type="hidden" id="id">
                             <label for="name">Name</label>
                             <input type="text" class="form-control" id="name" name="name">
                             <label for="address">Address</label>
@@ -79,7 +80,7 @@
             </div>
             <div class="modal-footer" id="but">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="save()">Save</button>
+                <button type="button" class="btn btn-primary" onclick="update()">Save</button>
             </div>
         </div>
     </div>
@@ -95,6 +96,8 @@
                 <th scope="col">Image</th>
                 <th scope="col">Bathroom</th>
                 <th scope="col">Bedroom</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Delete</th>
             </tr>
             </thead>
             <tbody id="display">
@@ -108,36 +111,75 @@
 </body>
 <script>
     let validName = $("#validName")
-    let display = document.getElementById("display")
-    let addForm = document.getElementById("addForm")
-    // findAll();
+    let display = document.getElementById("display")//$("#display")
+    let form = document.getElementById("form")//$("#addForm")
     findAll(0);
+
     function findAll(number) {
         let pageable = document.getElementById("pageable")
         $.ajax({
             type: "GET",
-            url: "http://localhost:8080/api/homes?page="+number,
+            url: "http://localhost:8080/api/homes?page=" + number,
             success: function (data) {
                 console.log(data)
                 displayList(data.content);
                 let str = ""
                 let num = data.pageable.pageNumber
                 console.log(num)
-                if(num > 0 || num+1 === data.totalPages) {
-                    str += `<a onclick="findAll(${num-1})">Previous </a>`
+                if (num > 0 || num + 1 === data.totalPages) {
+                    str += `<a onclick="findAll(${num - 1})">Previous </a>`
                 }
-                str += `${num+1}/${data.totalPages}`
-                if(num <= 0 || num+1 !== data.totalPages) {
-                    str += `<a onclick="findAll(${num+1})"> Next</a>`
+                str += `${num + 1}/${data.totalPages}`
+                if (num <= 0 || num + 1 !== data.totalPages) {
+                    str += `<a onclick="findAll(${num + 1})"> Next</a>`
                 }
                 pageable.innerHTML = str
             }
         });
     }
 
+    function showAddForm() {
+        form.reset();
+        $('.alert-success').html('').removeClass('hide');
+        $('.alert-danger').html('').removeClass('hide');
+    }
+
+    function showEditForm(id) {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/homes/" + id,
+            success: function (data) {
+                document.getElementById("id").value = data.id
+                document.getElementById("name").value = data.name
+                document.getElementById("address").value = data.address
+                document.getElementById("price").value = data.price
+                document.getElementById("numberOfBathroom").value = data.numberOfBathroom
+                document.getElementById("numberOfBedroom").value = data.numberOfBedroom
+            }
+        })
+    }
+
+    function showDeleteForm(id) {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/homes/" + id,
+            success: function (data) {
+                document.getElementById("id").value = data.id
+                document.getElementById("name").value = data.name
+                document.getElementById("address").value = data.address
+                document.getElementById("price").value = data.price
+                document.getElementById("numberOfBathroom").value = data.numberOfBathroom
+                document.getElementById("numberOfBedroom").value = data.numberOfBedroom
+            }
+        })
+        let str = `<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="deleteHome(${id})">Delete</button>`
+        document.getElementById("but").innerHTML = str;
+    }
+
     function save() {
         $('.alert-success').html('').removeClass('hide');
-        let formData = new FormData(addForm);
+        let formData = new FormData(form);
         $.ajax({
             type: "POST",
             enctype: 'multipart/form-data',
@@ -148,48 +190,96 @@
             cache: false,
             timeout: 1000000,
             success: function () {
+                $('.alert-danger').html('').removeClass('hide');
                 $('.alert-success').html('Thành công!').removeClass('hide');
-                $('.alert-danger').addClass('hide');
+                // $('.alert-danger').addClass('hide');
 
                 setTimeout(function () {
                     $("#addModal").modal('hide');
                     // $('.alert-danger').addClass('hide');
-                    $('.alert-success').addClass('hide');
+                    // $('.alert-success').addClass('hide');
                 }, 1500);
-                findAll();
-                addForm.reset();
+                findAll(0);
+                form.reset();
             },
             error: function (error) {
+                $('.alert-danger').html('Thất bại!').removeClass('hide');
                 console.log(error)
-                validName.text(error.responseJSON.name)
+                // validName.text(error.responseJSON.error)
             },
         })
-        // $.ajax({
-        //     type: "POST",
-        //     enctype: "multipart/form-data",
-        //
-        //     data: formData,
-        //     processData: false,
-        //     contentType: false,
-        //     cache: false,
-        //     timeout: 1000000,
-        //     success: function (data) {
-        //         $('.alert-success').html('Successful!').removeClass('hide');
-        //         $('.alert-danger').addClass('hide');
-        //
-        //         setTimeout(function () {
-        //             $("#addModal").modal('hide');
-        //             // $('.alert-danger').addClass('hide');
-        //             $('.alert-success').addClass('hide');
-        //         }, 1500);
-        //         // findAll();
-        //         document.getElementById("main").innerHTML = `${data.name} <img src="image/${data.image}">`
-        //     },
-        //     error: function (error) {
-        //         console.log(error)
-        //         // validName.text(error.responseJSON.name)
-        //     },
-        // })
+    }
+
+    function update() {
+        let id = document.getElementById("id").value;
+        $('.alert-success').html('').removeClass('hide');
+        let formData = new FormData(form);
+        if (id == null) {
+            save()
+        } else {
+            $.ajax({
+                type: "PUT",
+                enctype: 'multipart/form-data',
+                url: "http://localhost:8080/api/homes/" + id,
+                data: formData,
+                processData: false,
+                contentType: false,
+                cache: false,
+                timeout: 1000000,
+                success: function () {
+                    $('.alert-danger').html('').removeClass('hide');
+                    $('.alert-success').html('Thành công!').removeClass('hide');
+                    // $('.alert-danger').addClass('hide');
+
+                    setTimeout(function () {
+                        $("#addModal").modal('hide');
+                        // $('.alert-danger').addClass('hide');
+                        // $('.alert-success').addClass('hide');
+                    }, 1500);
+                    findAll(0);
+                    form.reset();
+                },
+                error: function (error) {
+                    $('.alert-danger').html('Thất bại!').removeClass('hide');
+                    console.log(error)
+                    // validName.text(error.responseJSON.name)
+                },
+            });
+        }
+    }
+
+    //chua xong
+    function deleteHome(id) {
+        $('.alert-success').html('').removeClass('hide');
+        let formData = new FormData(form);
+        $.ajax({
+            type: "DELETE",
+            enctype: 'multipart/form-data',
+            url: "http://localhost:8080/api/homes/" + id,
+            data: formData,
+            processData: false,
+            contentType: false,
+            cache: false,
+            timeout: 1000000,
+            success: function () {
+                $('.alert-danger').html('').removeClass('hide');
+                $('.alert-success').html('Thành công!').removeClass('hide');
+                // $('.alert-danger').addClass('hide');
+
+                setTimeout(function () {
+                    $("#addModal").modal('hide');
+                    // $('.alert-danger').addClass('hide');
+                    // $('.alert-success').addClass('hide');
+                }, 1500);
+                findAll(0);
+                form.reset();
+            },
+            error: function (error) {
+                $('.alert-danger').html('Thất bại!').removeClass('hide');
+                console.log(error)
+                // validName.text(error.responseJSON.name)
+            },
+        });
     }
 
     // function findAll() {
@@ -212,6 +302,8 @@
                 <td><img src = "image/${data[i].image}" width="100px"></td>
                 <td>${data[i].numberOfBathroom}</td>
                 <td>${data[i].numberOfBedroom}</td>
+                <td><button class="btn btn-primary" data-toggle="modal" data-target="#addModal" onclick="showEditForm(${data[i].id})">Edit</button></td>
+                <td><button class="btn btn-danger" data-toggle="modal" data-target="#addModal" onclick="showDeleteForm(${data[i].id})">Delete</button></td>
             </tr>`
         }
         display.innerHTML = str
