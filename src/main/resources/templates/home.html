@@ -68,6 +68,7 @@
                             <input type="text" class="form-control" id="numberOfBedroom" name="numberOfBedroom">
                             <label for="file">Image</label><br>
                             <input type="file" id="file" name="file">
+                            <div id="oldFile"></div>
                         </form>
                     </div>
                 </div>
@@ -111,8 +112,8 @@
 </body>
 <script>
     let validName = $("#validName")
-    let display = document.getElementById("display")//$("#display")
-    let form = document.getElementById("form")//$("#addForm")
+    let display = document.getElementById("display")
+    let form = document.getElementById("form")
     findAll(0);
 
     function findAll(number) {
@@ -121,7 +122,6 @@
             type: "GET",
             url: "http://localhost:8080/api/homes?page=" + number,
             success: function (data) {
-                console.log(data)
                 displayList(data.content);
                 let str = ""
                 let num = data.pageable.pageNumber
@@ -139,6 +139,7 @@
     }
 
     function showAddForm() {
+        document.getElementById("id").value = 0
         form.reset();
         $('.alert-success').html('').removeClass('hide');
         $('.alert-danger').html('').removeClass('hide');
@@ -149,12 +150,16 @@
             type: "GET",
             url: "http://localhost:8080/api/homes/" + id,
             success: function (data) {
+                console.log(data.image)
                 document.getElementById("id").value = data.id
                 document.getElementById("name").value = data.name
                 document.getElementById("address").value = data.address
                 document.getElementById("price").value = data.price
                 document.getElementById("numberOfBathroom").value = data.numberOfBathroom
                 document.getElementById("numberOfBedroom").value = data.numberOfBedroom
+                document.getElementById("file").value = data.numberOfBedroom
+                document.getElementById("oldFile").innerHTML = `<img src="image/${data.image}" style="width: 100px" id="upfile1">`
+
             }
         })
     }
@@ -211,12 +216,13 @@
     }
 
     function update() {
-        let id = document.getElementById("id").value;
         $('.alert-success').html('').removeClass('hide');
-        let formData = new FormData(form);
-        if (id == null) {
+        let id = document.getElementById("id").value;
+        console.log("id : " + id)
+        if (id == 0) {
             save()
         } else {
+            let formData = new FormData(form);
             $.ajax({
                 type: "PUT",
                 enctype: 'multipart/form-data',
@@ -254,28 +260,28 @@
         let formData = new FormData(form);
         $.ajax({
             type: "DELETE",
-            enctype: 'multipart/form-data',
+            // enctype: 'multipart/form-data',
             url: "http://localhost:8080/api/homes/" + id,
             data: formData,
-            processData: false,
-            contentType: false,
-            cache: false,
-            timeout: 1000000,
+            // processData: false,
+            // contentType: false,
+            // cache: false,
+            // timeout: 1000000,
             success: function () {
-                $('.alert-danger').html('').removeClass('hide');
-                $('.alert-success').html('Thành công!').removeClass('hide');
+                // $('.alert-danger').html('').removeClass('hide');
+                // $('.alert-success').html('Thành công!').removeClass('hide');
                 // $('.alert-danger').addClass('hide');
 
-                setTimeout(function () {
-                    $("#addModal").modal('hide');
-                    // $('.alert-danger').addClass('hide');
-                    // $('.alert-success').addClass('hide');
-                }, 1500);
+                // setTimeout(function () {
+                //     $("#addModal").modal('hide');
+                //     // $('.alert-danger').addClass('hide');
+                //     // $('.alert-success').addClass('hide');
+                // }, 1500);
                 findAll(0);
-                form.reset();
+                // form.reset();
             },
             error: function (error) {
-                $('.alert-danger').html('Thất bại!').removeClass('hide');
+                // $('.alert-danger').html('Thất bại!').removeClass('hide');
                 console.log(error)
                 // validName.text(error.responseJSON.name)
             },
