@@ -60,20 +60,19 @@ public class HomeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Home> update(@PathVariable Long id, @RequestParam("file") MultipartFile file,@Valid Home home) {
-        Optional<Home> questionOptional = homeService.findById(id);
-        if (!questionOptional.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            home.setId(questionOptional.get().getId());
-            String fileName = file.getOriginalFilename();
-            home.setImage(fileName);
-            try {
-                file.transferTo(new File("C:\\Users\\hongh\\IdeaProjects\\demoBoot\\src\\main\\resources\\templates\\image\\" + fileName));
-            } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
-            return new ResponseEntity<>(homeService.save(home), HttpStatus.OK);
+        String fileName = file.getOriginalFilename();
+        if (fileName.equals("")){
+            home.setImage(homeService.findById(id).get().getImage());
+        }else {
+                home.setImage(fileName);
+                try {
+                    file.transferTo(new File("C:\\Users\\hongh\\IdeaProjects\\demoBoot\\src\\main\\resources\\templates\\image\\" + fileName));
+                } catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+        }
+        home.setId(id);
+        return new ResponseEntity<>(homeService.save(home), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

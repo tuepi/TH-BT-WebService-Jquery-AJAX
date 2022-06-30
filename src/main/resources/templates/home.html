@@ -164,24 +164,6 @@
         })
     }
 
-    function showDeleteForm(id) {
-        $.ajax({
-            type: "GET",
-            url: "http://localhost:8080/api/homes/" + id,
-            success: function (data) {
-                document.getElementById("id").value = data.id
-                document.getElementById("name").value = data.name
-                document.getElementById("address").value = data.address
-                document.getElementById("price").value = data.price
-                document.getElementById("numberOfBathroom").value = data.numberOfBathroom
-                document.getElementById("numberOfBedroom").value = data.numberOfBedroom
-            }
-        })
-        let str = `<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="deleteHome(${id})">Delete</button>`
-        document.getElementById("but").innerHTML = str;
-    }
-
     function save() {
         $('.alert-success').html('').removeClass('hide');
         let formData = new FormData(form);
@@ -254,36 +236,12 @@
         }
     }
 
-    //chua xong
     function deleteHome(id) {
-        $('.alert-success').html('').removeClass('hide');
-        let formData = new FormData(form);
         $.ajax({
             type: "DELETE",
-            // enctype: 'multipart/form-data',
             url: "http://localhost:8080/api/homes/" + id,
-            data: formData,
-            // processData: false,
-            // contentType: false,
-            // cache: false,
-            // timeout: 1000000,
             success: function () {
-                // $('.alert-danger').html('').removeClass('hide');
-                // $('.alert-success').html('Thành công!').removeClass('hide');
-                // $('.alert-danger').addClass('hide');
-
-                // setTimeout(function () {
-                //     $("#addModal").modal('hide');
-                //     // $('.alert-danger').addClass('hide');
-                //     // $('.alert-success').addClass('hide');
-                // }, 1500);
                 findAll(0);
-                // form.reset();
-            },
-            error: function (error) {
-                // $('.alert-danger').html('Thất bại!').removeClass('hide');
-                console.log(error)
-                // validName.text(error.responseJSON.name)
             },
         });
     }
@@ -309,7 +267,7 @@
                 <td>${data[i].numberOfBathroom}</td>
                 <td>${data[i].numberOfBedroom}</td>
                 <td><button class="btn btn-primary" data-toggle="modal" data-target="#addModal" onclick="showEditForm(${data[i].id})">Edit</button></td>
-                <td><button class="btn btn-danger" data-toggle="modal" data-target="#addModal" onclick="showDeleteForm(${data[i].id})">Delete</button></td>
+                <td><button class="btn btn-danger" onclick="deleteHome(${data[i].id})">Delete</button></td>
             </tr>`
         }
         display.innerHTML = str
